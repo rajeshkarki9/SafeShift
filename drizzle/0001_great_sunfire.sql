@@ -1,0 +1,1 @@
+ALTER TABLE "employee_topic_outcomes" ADD COLUMN "vrScore" integer;
