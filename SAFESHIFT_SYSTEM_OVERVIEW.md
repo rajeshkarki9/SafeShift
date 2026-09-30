@@ -9,8 +9,7 @@ SafeShift is an enterprise-grade workplace health, safety, and compliance platfo
 - **Interactive Multi-Stage Learning Journeys**: Structured progression covering *Instructional Content*, *Contextual Scenarios*, *Gamified PPE Gear Checks*, *Spatial Hazard Perception (360°/VR)*, *5-Question Assessment Quizzes*, and *Instant Explanatory Feedback*.
 - **Role-Based Portals**:
   1. **Employee (Trainee)**: Self-service profile readiness, individual topic progression, hands-on simulation modules, and historical quiz result archives.
-  2. **Manager**: Real-time workforce compliance monitoring, completion audits across a standard 50-person workforce, topic-by-topic progress tables, and performance drill-downs.
-  3. **Administrator**: Trainee account provisioning, credential management, forced password rotation, and curriculum governance.
+  2. **Manager**: Real-time workforce compliance monitoring, completion audits across a standard 50-person workforce, topic-by-topic progress tables, performance drill-downs, and workforce account provisioning.
 - **Fail-Safe Operational Architecture**: End-to-end type safety powered by tRPC v11 and Drizzle ORM against PostgreSQL, with an automatic in-memory fallback layer for seamless offline and local development.
 
 ---
@@ -131,7 +130,7 @@ Below is the directory map of the entire SafeShift repository:
 │       │   ├── trpc.ts                        # tRPC client instance and React Query bindings
 │       │   └── utils.ts                       # ClassName resolution (clsx + twMerge)
 │       └── pages/
-│           ├── Home.tsx                       # Unified Portal page (Auth, Learner, Manager, Admin flows)
+│           ├── Home.tsx                       # Unified Portal page (Auth, Learner, Manager flows)
 │           └── NotFound.tsx                   # 404 page
 │
 ├── server/                                    # Backend Application (Node.js + Express + tRPC)
@@ -587,10 +586,10 @@ SafeShift's backend provides end-to-end typed Remote Procedure Calls (tRPC) defi
 - `learning.managerRecords` *(Staff Query)*: Returns workforce summary across all registered employees.
 - `learning.managerTopicRecords` *(Staff Query)*: Returns granular, topic-by-topic scores and completion times across the workforce.
 
-### 6.4 Administrative Governance (`employees.*`)
-- `employees.list` *(Admin Query)*: Lists all provisioned employee accounts.
-- `employees.create` *(Admin Mutation)*: Creates a new employee login with default password `safeshift123` and mandatory reset flag.
-- `employees.resetPassword` *(Admin Mutation)*: Resets a user's password back to the initial setup state.
+### 6.4 Workforce Provisioning Governance (`employees.*`)
+- `employees.list` *(Staff Query)*: Lists all provisioned employee accounts.
+- `employees.create` *(Staff Mutation)*: Creates a new employee login with default password `safeshift123` and mandatory reset flag.
+- `employees.resetPassword` *(Staff Mutation)*: Resets a user's password back to the initial setup state.
 
 ---
 
@@ -627,5 +626,5 @@ pnpm start
 | :--- | :--- | :--- | :--- |
 | **Employee** | `avery@employee.com` | `safeshift123` | Learner Dashboard $\rightarrow$ PPE Minigame $\rightarrow$ VR Hazard $\rightarrow$ Quiz $\rightarrow$ History |
 | **Employee** | `blake@employee.com` | `safeshift123` | Learner Dashboard $\rightarrow$ Modular training progression |
-| **Manager** | `manager@safeshift.com` | `manager123` | Workforce Dashboard (50-worker metrics, completion rates, logs) |
-| **Administrator**| System Owner / Admin | Configured via ENV | Employee account provisioning, password reset, content controls |
+| **Manager** | `manager@safeshift.com` | `manager123` | Workforce Dashboard (50-worker metrics, completion rates, logs, employee account provisioning) |
+

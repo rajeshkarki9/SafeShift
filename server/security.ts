@@ -7,7 +7,7 @@ import {
 import { SignJWT, jwtVerify } from "jose";
 import { ENV } from "./_core/env";
 
-export type SafeShiftRole = "employee" | "manager" | "administrator";
+export type SafeShiftRole = "employee" | "manager";
 
 export type SafeShiftSession = {
   email: string;
@@ -51,10 +51,7 @@ export async function verifySessionToken(
     });
     const email = payload.sub;
     const role = payload.role as SafeShiftRole | undefined;
-    if (
-      !email ||
-      (role !== "employee" && role !== "manager" && role !== "administrator")
-    )
+    if (!email || (role !== "employee" && role !== "manager"))
       return null;
     return {
       email,

@@ -17,7 +17,6 @@ import {
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import {
-  administratorProcedure,
   employeeProcedure,
   publicProcedure,
   router,
@@ -187,8 +186,8 @@ export const appRouter = router({
     }),
   }),
   employees: router({
-    list: administratorProcedure.query(() => listEmployeeAccounts()),
-    create: administratorProcedure
+    list: staffProcedure.query(() => listEmployeeAccounts()),
+    create: staffProcedure
       .input(
         z.object({
           email: emailSchema,
@@ -210,7 +209,7 @@ export const appRouter = router({
           throw error;
         }
       }),
-    resetPassword: administratorProcedure
+    resetPassword: staffProcedure
       .input(
         z.object({
           email: emailSchema,

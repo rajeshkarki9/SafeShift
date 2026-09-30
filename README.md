@@ -36,8 +36,8 @@ Traditional corporate safety induction relies on static slide decks and superfic
 | Role | Primary User Journey | Core Capabilities |
 | :--- | :--- | :--- |
 | **Employee (Trainee)** | Learner Hub $\rightarrow$ 6 Safety Modules $\rightarrow$ PPE Check $\rightarrow$ 360° VR $\rightarrow$ Quiz $\rightarrow$ History | Self-paced onboarding, interactive scenario decisions, gamified equipment validation, real-time score calculation, and progress records. |
-| **Manager** | Workforce Overview $\rightarrow$ Topic Breakdowns $\rightarrow$ Audit Drill-Down | Real-time monitoring across 50 benchmark employees, module completion bars, quiz score averages, outstanding training lists, and individual score audits. |
-| **Administrator** | Employee Management $\rightarrow$ Password Governance $\rightarrow$ Curriculum Controls | Trainee account provisioning, credential generation, forced password rotation (`mustChangePassword`), and content controls. |
+| **Manager** | Workforce Overview $\rightarrow$ Topic Breakdowns $\rightarrow$ Audit Drill-Down $\rightarrow$ Workforce Provisioning | Real-time monitoring across 50 benchmark employees, module completion bars, quiz score averages, outstanding training lists, employee provisioning & credential management. |
+
 
 ---
 
@@ -162,7 +162,7 @@ Below is the exhaustive file tree of the SafeShift repository:
 │       │   ├── trpc.ts                        # tRPC client instance with React Query bindings
 │       │   └── utils.ts                       # ClassName resolution (clsx + twMerge)
 │       ├── pages/
-│       │   ├── Home.tsx                       # Master unified view (Auth, Employee, Manager, Admin)
+│       │   ├── Home.tsx                       # Master unified view (Auth, Employee, Manager)
 │       │   └── NotFound.tsx                   # 404 error page
 │       └── _core/
 │           └── hooks/
@@ -880,8 +880,7 @@ Once the application is running on `http://localhost:3000/`, use these pre-confi
 | :--- | :--- | :--- | :--- |
 | **Employee (Trainee)** | `avery@employee.com` | `safeshift123` | Learner Hub $\rightarrow$ 6 Safety Modules $\rightarrow$ PPE Check Minigame $\rightarrow$ 360° VR Simulation $\rightarrow$ 5-Question Quiz $\rightarrow$ Score Feedback & History. |
 | **Employee (Alt)** | `blake@employee.com` | `safeshift123` | Second employee profile with independent progression tracking. |
-| **Manager** | `manager@safeshift.com` | `manager123` | Workforce Compliance Dashboard (50-employee workforce metrics, completion bars, audit drill-downs). |
-| **Administrator** | `admin@safeshift.com` | `admin123` | Administrator Portal (Employee account provisioning, credential management, forced password resets). |
+| **Manager** | `manager@safeshift.com` | `manager123` | Workforce Compliance Dashboard (50-employee workforce metrics, completion bars, audit drill-downs, and employee account provisioning). |
 
 > [!NOTE]
 > The server incorporates an automatic **in-memory data store**. You do **not** need an active PostgreSQL instance running to log in, complete modules, or record quiz scores during local testing.

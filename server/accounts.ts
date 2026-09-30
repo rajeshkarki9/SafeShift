@@ -29,12 +29,11 @@ export class DuplicateEmailError extends Error {
 }
 
 /**
- * Built-in Manager and Administrator logins. Employee logins live in the
- * `employee_accounts` table and are provisioned by the Administrator.
+ * Built-in Manager login. Employee logins live in the
+ * `employee_accounts` table.
  */
 const STAFF_ACCOUNTS: Array<{ email: string; password: string; role: SafeShiftRole; name: string }> = [
   { email: "manager@safeshift.com", password: "manager123", role: "manager", name: "Manager" },
-  { email: "admin@safeshift.com", password: "admin123", role: "administrator", name: "Administrator" },
 ];
 
 export const DEFAULT_EMPLOYEE_PASSWORD = "safeshift123";

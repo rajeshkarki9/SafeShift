@@ -3,18 +3,15 @@ import {
   IconActivity,
   IconArrowLeft,
   IconArrowRight,
-  IconBookOpen,
   IconCheckCircle,
   IconCircleDashed,
   IconClock,
   IconDashboard,
   IconEye,
   IconEyeOff,
-  IconKeyRound,
   IconLogOut,
   IconTrendUp,
   IconUser,
-  IconUserPlus,
   IconUsers,
 } from "@/components/icons";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
@@ -22,7 +19,7 @@ import { trpc } from "@/lib/trpc";
 import { PPECheckModule } from "@/components/PPECheckModule";
 import { VRModule } from "@/components/VRModule";
 
-type Role = "employee" | "manager" | "administrator";
+type Role = "employee" | "manager";
 type Session = {
   email: string;
   role: Role;
@@ -39,10 +36,7 @@ type PortalRoute =
   | "manager-progress"
   | "manager-results"
   | "manager-completion"
-  | "manager-profile"
-  | "admin-dashboard"
-  | "content"
-  | "admin-employees";
+  | "manager-profile";
 type PortalNavigate = (route: PortalRoute, topicKey?: string) => Promise<void>;
 type TopicRecord = {
   id: number;
@@ -92,25 +86,13 @@ type QuizResult = {
     isCorrect: boolean;
   }>;
 };
-type EmployeeAccountView = {
-  id: number;
-  email: string;
-  displayName: string;
-  mustChangePassword: boolean;
-  department: string | null;
-  phone: string | null;
-  lastSignedIn: Date | null;
-  createdAt: Date;
-};
 
 const roleStart: Record<Role, PortalRoute> = {
   employee: "training",
   manager: "manager-dashboard",
-  administrator: "admin-dashboard",
 };
 const coreTopic = { key: "safe-choices", title: "Safe choices" };
 const TOTAL_WORKFORCE = 50;
-const DEFAULT_EMPLOYEE_PASSWORD = "safeshift123";
 const managerTopics = [
   { key: "safe-choices", title: "Manual Handling" },
   { key: "working-at-height", title: "Working at Height" },
@@ -755,7 +737,7 @@ function RolePortal({
     retry: false,
   });
   const managerRecords = trpc.learning.managerTopicRecords.useQuery(undefined, {
-    enabled: role === "manager" || role === "administrator",
+    enabled: role === "manager",
     retry: false,
   });
   const currentTopicRecord =
@@ -770,12 +752,7 @@ function RolePortal({
     ...(managerRecords.data || []),
     ...getLocalTopicRecords(),
   ]);
-  const label =
-    role === "employee"
-      ? employeeName
-      : role === "manager"
-        ? "Manager"
-        : "Administrator";
+  const label = role === "employee" ? employeeName : "Manager";
   const nav =
     role === "employee"
       ? [
@@ -783,13 +760,7 @@ function RolePortal({
           ["quiz", "Quiz"],
           ["progress", "My progress"],
         ]
-      : role === "administrator"
-        ? [
-            ["admin-dashboard", "Dashboard"],
-            ["content", "Manage content"],
-            ["admin-employees", "Employees"],
-          ]
-        : [];
+      : [];
   const navigate = async (next: PortalRoute, topicKey = selectedTopicKey) => {
     setSelectedEmployee(null);
     if (topicKey !== selectedTopicKey) setSelectedTopicKey(topicKey);
@@ -900,7 +871,7 @@ function RolePortal({
                 : getLocalQuizAttempts(employeeEmail)
             }
           />
-        ) : role === "manager" ? (
+        ) : (
           <ManagerRoute
             route={route}
             go={navigate}
@@ -910,8 +881,6 @@ function RolePortal({
             selectedEmployee={selectedEmployee}
             onSelectEmployee={setSelectedEmployee}
           />
-        ) : (
-          <AdminRoute route={route} go={navigate} />
         )}
       </main>
     </div>
@@ -923,11 +892,11 @@ function EmployeeRoute({
   go,
   onSubmitQuiz,
   name,
-  record,
+  record: _record,
   records,
   saving,
   selectedTopicKey,
-  onSelectTopic,
+  onSelectTopic: _onSelectTopic,
   quizResult,
   previousAttempts,
 }: {
@@ -1188,7 +1157,7 @@ function EmployeeRoute({
               />
             )}
             {isPPEMinigame && (
-              <PPECheckModule onComplete={(score) => advance()} />
+              <PPECheckModule onComplete={() => advance()} />
             )}
             {needsChoice && (
               <div className="employee-stage-options">
@@ -1369,10 +1338,8 @@ function EmployeeProgress({
         </div>
       </div>
       <div className="employee-progress-list">
-        {topics.map(topic => {
-          const record = records.find(item => item.topicKey === topic.key);
-          return (
-            <article className="employee-progress-row" key={topic.key}>
+        {topics.map(topic => (
+          <article className="employee-progress-row" key={topic.key}>
               <div className="employee-progress-icon">
                 {topic.status === "Completed" ? (
                   <IconCheckCircle />
@@ -1406,8 +1373,7 @@ function EmployeeProgress({
                 <span style={{ width: `${topic.progress}%` }} />
               </div>
             </article>
-          );
-        })}
+          ))}
       </div>
     </section>
   );
@@ -2156,239 +2122,6 @@ function ManagerStat({
   );
 }
 
-function AdminRoute({ route, go }: { route: PortalRoute; go: PortalNavigate }) {
-  if (route === "admin-employees") return <AdminEmployees />;
-  return route === "admin-dashboard" ? (
-    <PortalFeature
-      eyebrow="ADMIN DASHBOARD"
-      title="Training administration"
-      text="Manage the learning content used across SafeShift, and provision individual employee logins."
-      icon={<IconDashboard />}
-      action="Manage training content"
-      onAction={() => go("content")}
-    />
-  ) : (
-    <PortalFeature
-      eyebrow="ADMINISTRATOR"
-      title="Manage training content"
-      text="Maintain training topics and assessment materials for employees."
-      icon={<IconBookOpen />}
-      action="Back to admin dashboard"
-      onAction={() => go("admin-dashboard")}
-    />
-  );
-}
-
-function AdminEmployees() {
-  const utils = trpc.useUtils();
-  const accountsQuery = trpc.employees.list.useQuery();
-  const createAccount = trpc.employees.create.useMutation({
-    onSuccess: () => utils.employees.list.invalidate(),
-  });
-  const resetPassword = trpc.employees.resetPassword.useMutation({
-    onSuccess: () => utils.employees.list.invalidate(),
-  });
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [initialPassword, setInitialPassword] = useState("");
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  const create = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError("");
-    setNotice("");
-    try {
-      const created = await createAccount.mutateAsync({
-        email: email.trim().toLowerCase(),
-        displayName: name.trim() || undefined,
-        password: initialPassword.trim() || undefined,
-      });
-      setNotice(
-        `Account created for ${created.email}. First sign-in password: ${initialPassword.trim() || DEFAULT_EMPLOYEE_PASSWORD}. The employee will be asked to change it and confirm their details.`
-      );
-      setEmail("");
-      setName("");
-      setInitialPassword("");
-    } catch (createError) {
-      setError(
-        extractErrorMessage(createError, "Could not create the account.")
-      );
-    }
-  };
-  const reset = async (account: EmployeeAccountView) => {
-    if (
-      !window.confirm(
-        `Reset the password for ${account.displayName} (${account.email})?\n\nThey will sign in with "${DEFAULT_EMPLOYEE_PASSWORD}" and must choose a new password.`
-      )
-    )
-      return;
-    setError("");
-    setNotice("");
-    try {
-      await resetPassword.mutateAsync({ email: account.email });
-      setNotice(
-        `Password for ${account.email} was reset to ${DEFAULT_EMPLOYEE_PASSWORD}. They will be asked to change it at next sign-in.`
-      );
-    } catch (resetError) {
-      setError(
-        extractErrorMessage(resetError, "Could not reset the password.")
-      );
-    }
-  };
-  const accounts = accountsQuery.data ?? [];
-  return (
-    <section className="admin-employees">
-      <PortalHeading
-        eyebrow="ADMINISTRATOR / EMPLOYEES"
-        title="Employee logins"
-        text="Give every employee their own email and default password. Each employee sets their own password and details the first time they sign in."
-      />
-      <form className="manager-panel admin-employee-form" onSubmit={create}>
-        <div className="admin-employee-form-title">
-          <IconUserPlus />
-          <div>
-            <span>NEW ACCOUNT</span>
-            <h2>Add an employee</h2>
-          </div>
-        </div>
-        <div className="admin-employee-fields">
-          <label>
-            Login email
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={event => setEmail(event.target.value)}
-              placeholder="theirname@employee.com"
-            />
-          </label>
-          <label>
-            Full name
-            <input
-              value={name}
-              onChange={event => setName(event.target.value)}
-              placeholder="Full name"
-              maxLength={120}
-            />
-          </label>
-          <label>
-            First sign-in password
-            <input
-              value={initialPassword}
-              onChange={event => setInitialPassword(event.target.value)}
-              placeholder={`Defaults to ${DEFAULT_EMPLOYEE_PASSWORD}`}
-              minLength={8}
-              maxLength={200}
-            />
-          </label>
-        </div>
-        {error && (
-          <p className="role-login-error" role="alert">
-            {error}
-          </p>
-        )}
-        {notice && (
-          <p className="admin-notice" role="status">
-            {notice}
-          </p>
-        )}
-        <button
-          className="portal-primary"
-          type="submit"
-          disabled={createAccount.isPending}
-        >
-          {createAccount.isPending ? "Creating…" : "Create account"}
-          <IconArrowRight />
-        </button>
-      </form>
-      <section className="manager-panel manager-table-panel">
-        <div className="manager-panel-title">
-          <div>
-            <span>ACCOUNTS</span>
-            <h2>Provisioned employees</h2>
-          </div>
-          {accountsQuery.isFetching && (
-            <span className="muted-cell">Refreshing…</span>
-          )}
-        </div>
-        {accounts.length ? (
-          <div className="manager-table-wrap">
-            <table className="manager-table">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Details</th>
-                  <th>Status</th>
-                  <th>Last sign-in</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accounts.map(account => (
-                  <tr key={account.id}>
-                    <td>
-                      <strong>{account.displayName}</strong>
-                      <small>{account.email}</small>
-                    </td>
-                    <td>
-                      {account.department || account.phone ? (
-                        <>
-                          {account.department ? (
-                            <span>{account.department}</span>
-                          ) : null}
-                          {account.department && account.phone ? " · " : ""}
-                          {account.phone ? <span>{account.phone}</span> : null}
-                        </>
-                      ) : (
-                        <span className="muted-cell">Not set yet</span>
-                      )}
-                    </td>
-                    <td>
-                      {account.mustChangePassword ? (
-                        <span className="manager-status status-not-started">
-                          First sign-in pending
-                        </span>
-                      ) : (
-                        <span className="manager-status status-completed">
-                          Active
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {account.lastSignedIn ? (
-                        new Date(account.lastSignedIn).toLocaleString()
-                      ) : (
-                        <span className="muted-cell">Never</span>
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        className="manager-view-button"
-                        onClick={() => reset(account)}
-                        disabled={resetPassword.isPending}
-                      >
-                        <IconKeyRound /> Reset password
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="manager-empty">
-            <IconUsers />
-            <strong>No employee accounts yet</strong>
-            <p>
-              Create the first employee account above. New accounts require a
-              password change on first sign-in.
-            </p>
-          </div>
-        )}
-      </section>
-    </section>
-  );
-}
 
 function PortalHeading({
   eyebrow,
@@ -2429,28 +2162,4 @@ function ManagerPageHeader({
     </div>
   );
 }
-function PortalFeature({
-  eyebrow,
-  title,
-  text,
-  icon,
-  action,
-  onAction,
-}: {
-  eyebrow: string;
-  title: string;
-  text: string;
-  icon: ReactNode;
-  action: string;
-  onAction: () => void | Promise<void>;
-}) {
-  return (
-    <section className="portal-feature">
-      <div className="portal-feature-icon">{icon}</div>
-      <PortalHeading eyebrow={eyebrow} title={title} text={text} />
-      <button className="portal-primary" onClick={onAction}>
-        {action} <IconArrowRight />
-      </button>
-    </section>
-  );
-}
+

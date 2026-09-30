@@ -70,8 +70,6 @@ export const employeeProcedure = t.procedure.use(
   requireSessionRole("employee")
 );
 export const staffProcedure = t.procedure.use(
-  requireSessionRole("manager", "administrator")
+  requireSessionRole("manager")
 );
-export const administratorProcedure = t.procedure.use(
-  requireSessionRole("administrator")
-);
+export const managerProcedure = staffProcedure;

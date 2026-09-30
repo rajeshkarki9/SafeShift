@@ -23,10 +23,10 @@ function createContext(session: SafeShiftSession | null): {
   return { ctx, cookies };
 }
 
-const adminSession: SafeShiftSession = {
-  email: "admin@safeshift.com",
-  role: "administrator",
-  name: "Administrator",
+const managerSession: SafeShiftSession = {
+  email: "manager@safeshift.com",
+  role: "manager",
+  name: "Manager",
   mustChangePassword: false,
 };
 
@@ -69,20 +69,13 @@ describe("auth router", () => {
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 
-  it("signs in the built-in Manager and Administrator accounts", async () => {
+  it("signs in the built-in Manager account", async () => {
     const manager = await appRouter
       .createCaller(createContext(null).ctx)
       .auth.login({ email: "manager@safeshift.com", password: "manager123" });
-    const admin = await appRouter
-      .createCaller(createContext(null).ctx)
-      .auth.login({ email: "admin@safeshift.com", password: "admin123" });
 
     expect(manager).toMatchObject({
       role: "manager",
-      mustChangePassword: false,
-    });
-    expect(admin).toMatchObject({
-      role: "administrator",
       mustChangePassword: false,
     });
   });
@@ -125,7 +118,7 @@ describe("auth router", () => {
 
   it("blocks first sign-in setup for non-employee sessions and completed accounts", async () => {
     const manager = await appRouter.createCaller(
-      createContext({ ...adminSession, role: "manager" }).ctx
+      createContext(managerSession).ctx
     );
     await expect(
       manager.auth.completeFirstLogin({
@@ -151,10 +144,10 @@ describe("auth router", () => {
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
-  it("lets the Administrator provision unique employee emails and rejects duplicates", async () => {
-    const admin = appRouter.createCaller(createContext(adminSession).ctx);
+  it("lets the Manager provision unique employee emails and rejects duplicates", async () => {
+    const manager = appRouter.createCaller(createContext(managerSession).ctx);
 
-    const created = await admin.employees.create({
+    const created = await manager.employees.create({
       email: "Jordan@Employee.com",
       displayName: "Jordan Lee",
     });
@@ -165,16 +158,16 @@ describe("auth router", () => {
     });
 
     await expect(
-      admin.employees.create({ email: "jordan@employee.com" })
+      manager.employees.create({ email: "jordan@employee.com" })
     ).rejects.toMatchObject({ code: "CONFLICT" });
 
-    const list = await admin.employees.list();
+    const list = await manager.employees.list();
     expect(list.some(account => account.email === "jordan@employee.com")).toBe(
       true
     );
   });
 
-  it("keeps employee management administrator-only", async () => {
+  it("keeps employee management manager-only", async () => {
     const employee: SafeShiftSession = {
       email: "avery@employee.com",
       role: "employee",
@@ -192,8 +185,8 @@ describe("auth router", () => {
   });
 
   it("resets an employee password and requires another first sign-in setup", async () => {
-    const admin = appRouter.createCaller(createContext(adminSession).ctx);
-    await admin.employees.resetPassword({
+    const manager = appRouter.createCaller(createContext(managerSession).ctx);
+    await manager.employees.resetPassword({
       email: "avery@employee.com",
       password: "ResetPass123",
     });
