@@ -63,20 +63,17 @@ Below is the exhaustive file tree of the SafeShift repository:
 2nd Safeshift website/
 ├── .env                                       # Environment configuration (DATABASE_URL, secrets, PORT)
 ├── .gitignore                                 # Git exclusions (node_modules, dist, .env, build caches)
-├── .gitkeep                                   # Git directory placeholder
 ├── .prettierrc / .prettierignore             # Formatting configuration and file exclusions
 ├── .project-config.json                       # IDE & workspace tooling metadata
 ├── components.json                            # Radix / shadcn UI design system manifest
 ├── drizzle.config.ts                          # Drizzle ORM migration and schema configuration
 ├── ideas.md                                   # Brand design identity ("Quiet Confidence") & style guide
 ├── logo.png                                   # High-resolution primary SafeShift branding logo
-├── next-env.d.ts                              # Next.js ambient environment declarations (legacy compatibility)
 ├── package.json                               # Dependencies, package metadata, and lifecycle scripts
 ├── pnpm-lock.yaml                             # Deterministic pnpm dependency lockfile
 ├── README.md                                  # Primary project documentation, UML, and operational guide
 ├── SAFE_SHIFT_REQUIREMENTS_TRACEABILITY.md   # Functional requirements audit (SS-01 to SS-17 verification)
 ├── SAFESHIFT_SYSTEM_OVERVIEW.md               # Exhaustive technical architecture, DB models & IoT blueprint
-├── template.json                              # Project template definitions
 ├── todo.md                                    # Feature checklist, milestones, and implementation history
 ├── tsconfig.json                              # Strict TypeScript configuration and alias path mappings
 ├── vite.config.ts                             # Vite frontend build pipeline, root configuration & aliases
@@ -166,7 +163,6 @@ Below is the exhaustive file tree of the SafeShift repository:
 │       │   └── utils.ts                       # ClassName resolution (clsx + twMerge)
 │       ├── pages/
 │       │   ├── Home.tsx                       # Master unified view (Auth, Employee, Manager, Admin)
-│       │   ├── ComponentShowcase.tsx          # Design system component gallery
 │       │   └── NotFound.tsx                   # 404 error page
 │       └── _core/
 │           └── hooks/
@@ -187,13 +183,8 @@ Below is the exhaustive file tree of the SafeShift repository:
 │   └── _core/                                 # Server Infrastructure & Middleware
 │       ├── context.ts                         # tRPC request context extractor
 │       ├── cookies.ts                         # HTTP cookie options & parsing
-│       ├── dataApi.ts                         # Data fetching adapters
 │       ├── env.ts                             # Environment variable parser
-│       ├── heartbeat.ts                       # System health-check heartbeat
-│       ├── imageGeneration.ts                 # Image generation adapters
 │       ├── index.ts                           # Server startup orchestrator & port resolution
-│       ├── llm.ts                             # LLM / AI assistant interface
-│       ├── map.ts                             # Map services helper
 │       ├── notification.ts                    # Notification dispatchers
 │       ├── oauth.ts                           # OAuth route handlers
 │       ├── sdk.ts                             # Core SDK bindings
@@ -201,7 +192,6 @@ Below is the exhaustive file tree of the SafeShift repository:
 │       ├── systemRouter.ts                    # Diagnostic tRPC procedures
 │       ├── trpc.ts                            # tRPC initialization, middleware & role procedures
 │       ├── vite.ts                            # Development Vite HMR middleware integration
-│       ├── voiceTranscription.ts              # Audio/Voice processing adapters
 │       └── types/
 │           ├── cookie.d.ts                    # Ambient cookie typing
 │           └── manusTypes.ts                  # Internal system types
@@ -254,7 +244,8 @@ flowchart TD
     UI --> TRPC_C
     VR --> UI
     PPE --> UI
-    TRPC_C <-->|HTTP / JSON-RPC (HTTP-Only Cookies)| TRPC_S
+    TRPC_C -->|"HTTP / JSON-RPC Requests"| TRPC_S
+    TRPC_S -->|"Session Cookie Responses"| TRPC_C
     TRPC_S --> AUTH_ROUTER
     TRPC_S --> LEARN_ROUTER
     TRPC_S --> EMP_ROUTER

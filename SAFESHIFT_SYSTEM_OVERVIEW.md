@@ -132,7 +132,6 @@ Below is the directory map of the entire SafeShift repository:
 │       │   └── utils.ts                       # ClassName resolution (clsx + twMerge)
 │       └── pages/
 │           ├── Home.tsx                       # Unified Portal page (Auth, Learner, Manager, Admin flows)
-│           ├── ComponentShowcase.tsx          # Design system component gallery
 │           └── NotFound.tsx                   # 404 page
 │
 ├── server/                                    # Backend Application (Node.js + Express + tRPC)
